@@ -9,6 +9,7 @@ public class Block : MonoBehaviour
 {
     private List<List<bool>> shape;
     private GameObject cubeWrapper;
+    private GameObject boardObj;
     public GameObject cubePrefab;
     public GameObject cubeWrapperPrefab;
 
@@ -26,12 +27,23 @@ public class Block : MonoBehaviour
         for (int y=0; y < shape.Count; ++y) {
             for (int x=0; x < shape[y].Count; ++x) {
                 if (shape[y][x]) {
-                    GameObject obj = Instantiate(cubePrefab, new Vector3(this.cubeWrapper.transform.position.x + x,this.cubeWrapper.transform.position.y + y,0), new Quaternion(), this.cubeWrapper.transform);
+                    GameObject obj = Instantiate(
+                        cubePrefab,
+                        new Vector3(
+                            this.cubeWrapper.transform.position.x + x*this.transform.localScale.x,
+                            this.cubeWrapper.transform.position.y + y*this.transform.localScale.y,
+                            this.cubeWrapper.transform.position.z + 0*this.transform.localScale.z),
+                        new Quaternion(),
+                        this.cubeWrapper.transform);
                     Cube cube = obj.GetComponent<Cube>();
                     cubes.Add(cube);
                 }
             }
         }
+    }
+
+    public void SetBoard(GameObject _board) {
+        boardObj = _board;
     }
 
     void Start()
@@ -73,10 +85,12 @@ public class Block : MonoBehaviour
             foreach (Cube cube in cubes) {
                 if (cube.inFrame) {inFrame = true; break;}
             }
-            if (inFrame) this.cubeWrapper.transform.position = new Vector3(
-                Mathf.Round(this.cubeWrapper.transform.position.x),
-                Mathf.Round(this.cubeWrapper.transform.position.y),
-                Mathf.Round(this.cubeWrapper.transform.position.z));
+            if (inFrame) {
+                Vector3 temp = this.cubeWrapper.transform.position - boardObj.transform.position;
+                temp = new Vector3(temp.x / this.transform.localScale.x, temp.y / this.transform.localScale.y, temp.z / this.transform.localScale.z);
+                temp = new Vector3(Mathf.Round(temp.x), Mathf.Round(temp.y), Mathf.Round(temp.z));
+                this.cubeWrapper.transform.position = boardObj.transform.position + Vector3.Scale(temp, this.transform.localScale);
+            }
         }
     }
 

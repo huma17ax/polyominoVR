@@ -32,7 +32,14 @@ public class Board : MonoBehaviour
 
         for (int y=0; y < board.Count; ++y) {
             for (int x=0; x < board[y].Count; ++x) {
-                Instantiate(framePrefab, new Vector3(x,y,0), new Quaternion(), this.transform);
+                Instantiate(
+                    framePrefab,
+                    new Vector3(
+                        this.transform.position.x + x*this.transform.localScale.x,
+                        this.transform.position.y + y*this.transform.localScale.y,
+                        this.transform.position.z + 0*this.transform.localScale.z),
+                    new Quaternion(),
+                    this.transform);
             }
         }
 
@@ -66,9 +73,11 @@ public class Board : MonoBehaviour
                 .Select(row => row.Select(val => val == id).ToList())
                 .ToList();
             
-            GameObject blockInstance = Instantiate(blockPrefab, new Vector3(-10+4*(pos++),-5,0), new Quaternion());
+            GameObject blockInstance = Instantiate(blockPrefab, new Vector3(this.transform.position.x - 1+0.4f*(pos++),this.transform.position.y,this.transform.position.z-0.15f), new Quaternion());
+            blockInstance.transform.localScale = this.transform.localScale;
             Block _temp_block = blockInstance.GetComponent<Block>();
             _temp_block.SetShape(blockShape);
+            _temp_block.SetBoard(this.gameObject);
             blocks.Add(_temp_block);
         }
     }
