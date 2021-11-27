@@ -9,6 +9,14 @@ public class Board : MonoBehaviour
 {
     public GameObject blockPrefab;
     public GameObject framePrefab;
+    private Color[] colors = {
+        new Color(1f,0.3f,0.3f,1f),
+        new Color(0.3f,1f,0.3f,1f),
+        new Color(0.3f,0.3f,1f,1f),
+        new Color(1f,1f,0.3f,1f),
+        new Color(1f,0.3f,1f,1f),
+        new Color(0.3f,1f,1f,1f)
+    };
     
     void Start()
     {
@@ -73,12 +81,14 @@ public class Board : MonoBehaviour
                 .Select(row => row.Select(val => val == id).ToList())
                 .ToList();
             
-            GameObject blockInstance = Instantiate(blockPrefab, new Vector3(this.transform.position.x - 1+0.4f*(pos++),this.transform.position.y,this.transform.position.z-0.15f), new Quaternion());
+            GameObject blockInstance = Instantiate(blockPrefab, new Vector3(this.transform.position.x - 1+0.4f*(pos),this.transform.position.y,this.transform.position.z-0.15f), new Quaternion());
             blockInstance.transform.localScale = this.transform.localScale;
             Block _temp_block = blockInstance.GetComponent<Block>();
             _temp_block.SetShape(blockShape);
+            _temp_block.SetColor(colors[pos]);
             _temp_block.SetBoard(this.gameObject);
             blocks.Add(_temp_block);
+            pos++;
         }
     }
 

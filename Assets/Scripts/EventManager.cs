@@ -14,7 +14,9 @@ public class EventManager
 
     public enum Event {
         RightHandShakeClockwise,
-        RightHandShakeAnticlockwise
+        RightHandShakeAnticlockwise,
+        HandTouchEnterBlock,
+        HandTouchLeaveBlock
     }
 
     private Dictionary<Event, EventHandler> eventHandler = new Dictionary<Event, EventHandler>();

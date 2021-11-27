@@ -12,11 +12,14 @@ public class Block : MonoBehaviour
     private GameObject boardObj;
     public GameObject cubePrefab;
     public GameObject cubeWrapperPrefab;
+    private Color color;
 
-    public bool test;
     private const float rotateTime = 0.1f;
     private float leftTime;
     private int rotateWay = 0;
+    private bool isTouched = false;
+    private HandControlManager? graspedHand = null;
+    private Vector3? prevHandPos = null;
 
     private List<Cube> cubes = new List<Cube>();
 
@@ -35,10 +38,19 @@ public class Block : MonoBehaviour
                             this.cubeWrapper.transform.position.z + 0*this.transform.localScale.z),
                         new Quaternion(),
                         this.cubeWrapper.transform);
+                    obj.GetComponent<Renderer>().material.color = color;
                     Cube cube = obj.GetComponent<Cube>();
+                    cube.SetAffiliatedBlock(this);
                     cubes.Add(cube);
                 }
             }
+        }
+    }
+
+    public void SetColor(Color _color) {
+        color = _color;
+        foreach (Cube cube in cubes) {
+            cube.gameObject.GetComponent<Renderer>().material.color = _color;
         }
     }
 
@@ -46,41 +58,38 @@ public class Block : MonoBehaviour
         boardObj = _board;
     }
 
+    public void Grasp(HandControlManager? hand) {
+        graspedHand = hand;
+    }
+
+    private void Rotate(bool clockwise) {
+        if (graspedHand && leftTime == 0.0f) {
+            leftTime = rotateTime;
+            rotateWay = (clockwise ? 1 : -1);
+        }
+    }
+    void RotateClockwise(object obj, EventArgs args) { Rotate(true); }
+    void RotateAnticlockwise(object obj, EventArgs args) { Rotate(false); }
+
     void Start()
     {
-        
+        EventManager.Instance.Subscribe(EventManager.Event.RightHandShakeClockwise, RotateClockwise);
+        EventManager.Instance.Subscribe(EventManager.Event.RightHandShakeAnticlockwise, RotateAnticlockwise);
     }
 
     void Update()
     {
-        if (test) {
-            test = false;
-            leftTime = rotateTime;
-            rotateWay = -1;
-        }
         if (leftTime > 0f) {
-            if (leftTime > Time.deltaTime) {
+            if (leftTime > Time.deltaTime && graspedHand) {
                 leftTime -= Time.deltaTime;
-                this.cubeWrapper.transform.Rotate(new Vector3(0f,0f,rotateWay*90f*Time.deltaTime/rotateTime));
+                this.cubeWrapper.transform.RotateAround((Vector3)prevHandPos, Vector3.forward, rotateWay*90f*Time.deltaTime/rotateTime);
             }
             else {
-                this.cubeWrapper.transform.Rotate(new Vector3(0f,0f,rotateWay*90f*leftTime/rotateTime));
+                this.cubeWrapper.transform.RotateAround((Vector3)prevHandPos, Vector3.forward, rotateWay*90f*leftTime/rotateTime);
                 leftTime = 0.0f;
             }
         }
-        if (Input.GetKey(KeyCode.LeftArrow)) {
-            this.transform.Translate(Vector3.left * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.RightArrow)) {
-            this.transform.Translate(Vector3.right * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.UpArrow)) {
-            this.transform.Translate(Vector3.up * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.DownArrow)) {
-            this.transform.Translate(Vector3.down * Time.deltaTime);
-        }
-        if (!Input.GetKey(KeyCode.LeftArrow) && !Input.GetKey(KeyCode.RightArrow) && !Input.GetKey(KeyCode.UpArrow) && !Input.GetKey(KeyCode.DownArrow)) {
+        if (!graspedHand) {
             bool inFrame = false;
             foreach (Cube cube in cubes) {
                 if (cube.inFrame) {inFrame = true; break;}
@@ -92,6 +101,15 @@ public class Block : MonoBehaviour
                 this.cubeWrapper.transform.position = boardObj.transform.position + Vector3.Scale(temp, this.transform.localScale);
             }
         }
+        if (graspedHand) {
+            if (prevHandPos.HasValue) {
+                this.transform.position = this.transform.position + graspedHand.gameObject.transform.position - (Vector3)prevHandPos;
+            }
+            prevHandPos = graspedHand.gameObject.transform.position;
+        } else if (leftTime == 0.0f) {
+            prevHandPos = null;
+        }
+
     }
 
 }
