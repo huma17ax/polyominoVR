@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
+// 手の握る操作
 public class HandControlManager : MonoBehaviour
 {
     private List<Cube> touchingCubes = new List<Cube>();
@@ -10,12 +11,14 @@ public class HandControlManager : MonoBehaviour
 
     void Start()
     {
+        // イベントの購読
         EventManager.Instance.Subscribe(EventManager.Event.HandTouchEnterBlock, AddTouchingCube);
         EventManager.Instance.Subscribe(EventManager.Event.HandTouchLeaveBlock, RemoveTouchingCube);
     }
 
     void Update()
     {
+        // コントローラーを握ったとき
         if (OVRInput.GetDown(OVRInput.RawButton.RHandTrigger)) {
             float minDist = 100000f;
             Cube? nearestCube = null;
@@ -32,6 +35,8 @@ public class HandControlManager : MonoBehaviour
                 graspingBlock.Grasp(this);
             }
         }
+
+        // コントローラーを離したとき
         if (OVRInput.GetUp(OVRInput.RawButton.RHandTrigger) && graspingBlock) {
             graspingBlock.Grasp(null);
             graspingBlock = null;

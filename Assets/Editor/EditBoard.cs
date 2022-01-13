@@ -7,6 +7,7 @@ using System;
 using System.IO;
 using System.Text;
 
+// 簡易パズル盤面作成 エディタ拡張
 public class EditBoard : EditorWindow
 {
 
@@ -27,6 +28,7 @@ public class EditBoard : EditorWindow
 
     private void OnGUI(){
 
+        // 盤面サイズ等 設定
         using (new GUILayout.VerticalScope()) {
             gridSize.x = EditorGUILayout.DelayedIntField("Board Size X", gridSize.x);
             gridSize.y = EditorGUILayout.DelayedIntField("Board Size Y", gridSize.y);
@@ -36,6 +38,7 @@ public class EditBoard : EditorWindow
             if (GUILayout.Button("Export")) Export();
         }
 
+        // 盤面作成UI
         using (new GUILayout.AreaScope(new Rect(20, 100, 30*gridSize.x, 30*gridSize.y))) {
             
             for (int x=0; x < gridSize.x; ++x) {
@@ -55,6 +58,7 @@ public class EditBoard : EditorWindow
         if (gridSize.y < 1) gridSize.y = 1;
     }
 
+    // 盤面サイズの変更
     private void setBoardSize(Vector2Int size) {
         if (boardStats.Count == size.y && boardStats[0].Count == size.x) return;
         boardStats.AddRange(Enumerable.Range(0,Mathf.Max(0, size.y - boardStats.Count)).Select(_ => new List<int>()));
@@ -75,6 +79,7 @@ public class EditBoard : EditorWindow
         return Enum.GetName(typeof(blockType), value);
     }
 
+    // パズル形状ファイルの出力
     private void Export() {
         string filename = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
         StreamWriter file = new StreamWriter("./Assets/PazzleBoards/"+filename+".csv", true, Encoding.UTF8);

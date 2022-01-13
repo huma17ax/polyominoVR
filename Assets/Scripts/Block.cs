@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// ブロック(パズルの1ピース)
 public class Block : MonoBehaviour
 {
     private List<List<bool>> shape;
@@ -23,6 +24,7 @@ public class Block : MonoBehaviour
 
     private List<Cube> cubes = new List<Cube>();
 
+    //ブロック形状の設定(Cubeの生成)
     public void SetShape(List<List<bool>> _shape) {
         if (cubeWrapper) Destroy(cubeWrapper);
         cubeWrapper = Instantiate(cubeWrapperPrefab, this.transform.position, new Quaternion(), this.transform);
@@ -58,10 +60,12 @@ public class Block : MonoBehaviour
         boardObj = _board;
     }
 
+    // 掴まれた際に呼び出し
     public void Grasp(HandControlManager? hand) {
         graspedHand = hand;
     }
 
+    // 回転操作の際に呼び出し(回転開始)
     private void Rotate(bool clockwise) {
         if (graspedHand && leftTime == 0.0f) {
             leftTime = rotateTime;
@@ -73,12 +77,14 @@ public class Block : MonoBehaviour
 
     void Start()
     {
+        // イベントの購読
         EventManager.Instance.Subscribe(EventManager.Event.RightHandShakeClockwise, RotateClockwise);
         EventManager.Instance.Subscribe(EventManager.Event.RightHandShakeAnticlockwise, RotateAnticlockwise);
     }
 
     void Update()
     {
+        // rotateTimeかけて90度回転させる
         if (leftTime > 0f) {
             if (leftTime > Time.deltaTime && graspedHand) {
                 leftTime -= Time.deltaTime;
@@ -89,6 +95,8 @@ public class Block : MonoBehaviour
                 leftTime = 0.0f;
             }
         }
+
+        // 掴まれていない & Boardに近い場合，Boardのマス目に合わせて位置を補正
         if (!graspedHand) {
             bool inFrame = false;
             foreach (Cube cube in cubes) {
@@ -101,6 +109,8 @@ public class Block : MonoBehaviour
                 this.cubeWrapper.transform.position = boardObj.transform.position + Vector3.Scale(temp, this.transform.localScale);
             }
         }
+
+        // 掴まれているとき，手の位置に追従
         if (graspedHand) {
             if (prevHandPos.HasValue) {
                 this.transform.position = this.transform.position + graspedHand.gameObject.transform.position - (Vector3)prevHandPos;

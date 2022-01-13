@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// ブロックを構成する1マス
 public class Cube : MonoBehaviour
 {
     public bool inFrame {get; private set;} = false;
@@ -17,6 +18,7 @@ public class Cube : MonoBehaviour
 
     void Update()
     {
+        // Boardに近いか判定
         inFrame = false;
         foreach (Collider frame in triggeredFrames) {
             float distance = Vector3.Distance(frame.gameObject.transform.position, this.transform.position);
@@ -32,9 +34,11 @@ public class Cube : MonoBehaviour
     }
 
     void OnTriggerEnter(Collider other) {
+        // Boardに接触(侵入)
         if (other.gameObject.tag == "frame") {
             triggeredFrames.Add(other);
         }
+        // 手に接触(侵入)
         if (other.gameObject.tag == "hand") {
             isTouched = true;
             EventManager.Instance.NotifyEvent(EventManager.Event.HandTouchEnterBlock, this, null);

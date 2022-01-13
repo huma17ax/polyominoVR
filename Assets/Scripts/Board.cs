@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// パズル盤面
 public class Board : MonoBehaviour
 {
     public GameObject blockPrefab;
@@ -26,8 +27,9 @@ public class Board : MonoBehaviour
     {   
     }
 
+    // パズル形状ファイルを読み込み，Blockの生成
     public void Load(string path) {
-        // *ライブラリ使う
+        // TODO: *ライブラリ使う
         StreamReader reader = new StreamReader(path);
         List<List<int>> board = new List<List<int>>();
 
@@ -51,7 +53,7 @@ public class Board : MonoBehaviour
             }
         }
 
-        // *charに変える，非有効マスの処理(#)
+        // TODO: *charに変える，非有効マスの処理(#)
         List<int> ids = board.SelectMany(row => row).Distinct().ToList();
 
         Dictionary<int, (Vector2Int min, Vector2Int max)> blockRanges = new Dictionary<int, (Vector2Int, Vector2Int)>();
@@ -93,7 +95,7 @@ public class Board : MonoBehaviour
     }
 
     bool isValidBoard(List<List<int>> board) {
-        // *盤面正当性チェック
+        // TODO: *盤面正当性チェック
         Debug.Log((board.Count, board[0].Count));
         return true;
     }
