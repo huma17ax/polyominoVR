@@ -19,19 +19,19 @@ public class BoardGenerator
     private static System.Random rand = new System.Random();
 
     public BoardGenerator(string path, int block_num){
-        loadFrame(path);
-        setBlockNum(block_num);
+        LoadFrame(path);
+        SetBlockNum(block_num);
     }
     public BoardGenerator(List<List<int>> board, int block_num) {
-        setFrame(board);
-        setBlockNum(block_num);
+        SetFrame(board);
+        SetBlockNum(block_num);
     }
 
     /// <summary>
     /// ファイルから盤面形状を読み込み
     /// </summary>
     /// <param name="path">対象のファイルパス</param>
-    public void loadFrame(string path) {
+    public void LoadFrame(string path) {
         StreamReader reader = new StreamReader(path);
         List<List<int>> board = new List<List<int>>();
 
@@ -39,14 +39,14 @@ public class BoardGenerator
             string row = reader.ReadLine();
             board.Add(new List<int>(row.Split(',').Select(str => int.Parse(str))));
         }
-        setFrame(board);
+        SetFrame(board);
     }
 
     /// <summary>
     /// 盤面データから盤面形状を読み込み
     /// </summary>
     /// <param name="board">盤面データ</param>
-    public void setFrame(List<List<int>> board) {
+    public void SetFrame(List<List<int>> board) {
         frame = board
             .Select(row =>
                 row.Select(val => val!=0).ToList()
@@ -59,7 +59,7 @@ public class BoardGenerator
     /// 盤面を構成するブロック数を設定
     /// </summary>
     /// <param name="num">ブロック数</param>
-    public void setBlockNum(int num) {
+    public void SetBlockNum(int num) {
         block_num = num;
     }
 
@@ -67,7 +67,7 @@ public class BoardGenerator
     /// 盤面を生成
     /// </summary>
     /// <returns>生成した盤面データ</returns>
-    public List<List<int>> generate() {
+    public List<List<int>> Generate() {
         int id = 1;
         List<List<int>> board = frame
             .Select(row =>
@@ -80,8 +80,8 @@ public class BoardGenerator
         }
         
         for (var i=0; i<board_size-block_num; i++) {
-            Tuple<int, int> pair = selectBlockPair(board, block_size);
-            mergeBlock(board, block_size, pair.Item1, pair.Item2);
+            Tuple<int, int> pair = SelectBlockPair(board, block_size);
+            MergeBlock(board, block_size, pair.Item1, pair.Item2);
         }
 
         return board;
@@ -93,7 +93,7 @@ public class BoardGenerator
     /// <param name="board">盤面データ</param>
     /// <param name="block_size">各ブロックの大きさ</param>
     /// <returns>選択したブロックペア</returns>
-    private Tuple<int, int> selectBlockPair(List<List<int>> board, Dictionary<int, int> block_size) {
+    private Tuple<int, int> SelectBlockPair(List<List<int>> board, Dictionary<int, int> block_size) {
 
         // 隣接するブロックペアを列挙
         var neighbor = new HashSet<Tuple<int, int>>();
@@ -128,7 +128,7 @@ public class BoardGenerator
         double sum = 0;
         var probabilities = new List<Tuple<Tuple<int,int>, double>>();
         foreach (var pair in neighbor) {
-            double prob = calcProbability(block_size, neighbor_num, pair.Item1, pair.Item2);
+            double prob = CalcProbability(block_size, neighbor_num, pair.Item1, pair.Item2);
             probabilities.Add(new Tuple<Tuple<int, int>, double>(pair, prob));
             sum += prob;
         }
@@ -153,7 +153,7 @@ public class BoardGenerator
     /// <param name="block_id1">ブロックID1</param>
     /// <param name="block_id2">ブロックID2</param>
     /// <returns>ペアに対する確率</returns>
-    private double calcProbability(Dictionary<int, int> block_size, Dictionary<int, int> neighbor_num, int block_id1, int block_id2) {
+    private double CalcProbability(Dictionary<int, int> block_size, Dictionary<int, int> neighbor_num, int block_id1, int block_id2) {
         double prob = 
             (board_size / block_size[block_id1]) / neighbor_num[block_id1]
             * (board_size / block_size[block_id2]) / neighbor_num[block_id2];
@@ -168,7 +168,7 @@ public class BoardGenerator
     /// <param name="block_size">各ブロックの大きさ</param>
     /// <param name="block_id1">結合するブロックID1</param>
     /// <param name="block_id2">結合するブロックID2</param>
-    private void mergeBlock(List<List<int>> board, Dictionary<int, int> block_size, int block_id1, int block_id2) {
+    private void MergeBlock(List<List<int>> board, Dictionary<int, int> block_size, int block_id1, int block_id2) {
 
         block_size[block_id1] += block_size[block_id2];
         block_size[block_id2] = 0;
