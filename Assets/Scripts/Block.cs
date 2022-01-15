@@ -36,11 +36,11 @@ public class Block : MonoBehaviour
                     GameObject obj = Instantiate(
                         cubePrefab,
                         new Vector3(
-                            this.cubeWrapper.transform.position.x + x*this.transform.localScale.x,
-                            this.cubeWrapper.transform.position.y + y*this.transform.localScale.y,
-                            this.cubeWrapper.transform.position.z + 0*this.transform.localScale.z),
+                            cubeWrapper.transform.position.x + x*this.transform.localScale.x,
+                            cubeWrapper.transform.position.y + y*this.transform.localScale.y,
+                            cubeWrapper.transform.position.z + 0*this.transform.localScale.z),
                         new Quaternion(),
-                        this.cubeWrapper.transform);
+                        cubeWrapper.transform);
                     obj.GetComponent<Renderer>().material.color = color;
                     Cube cube = obj.GetComponent<Cube>();
                     cube.SetAffiliatedBlock(this);
@@ -90,10 +90,10 @@ public class Block : MonoBehaviour
         if (leftTime > 0f) {
             if (leftTime > Time.deltaTime && graspedHand) {
                 leftTime -= Time.deltaTime;
-                this.cubeWrapper.transform.RotateAround((Vector3)prevHandPos, Vector3.forward, rotateWay*90f*Time.deltaTime/rotateTime);
+                cubeWrapper.transform.RotateAround((Vector3)prevHandPos, Vector3.forward, rotateWay*90f*Time.deltaTime/rotateTime);
             }
             else {
-                this.cubeWrapper.transform.RotateAround((Vector3)prevHandPos, Vector3.forward, rotateWay*90f*leftTime/rotateTime);
+                cubeWrapper.transform.RotateAround((Vector3)prevHandPos, Vector3.forward, rotateWay*90f*leftTime/rotateTime);
                 leftTime = 0.0f;
             }
         }
@@ -105,10 +105,10 @@ public class Block : MonoBehaviour
                 if (cube.inFrame) {inFrame = true; break;}
             }
             if (inFrame) {
-                Vector3 temp = this.cubeWrapper.transform.position - boardObj.transform.position;
+                Vector3 temp = cubeWrapper.transform.position - boardObj.transform.position;
                 temp = new Vector3(temp.x / this.transform.localScale.x, temp.y / this.transform.localScale.y, temp.z / this.transform.localScale.z);
                 temp = new Vector3(Mathf.Round(temp.x), Mathf.Round(temp.y), Mathf.Round(temp.z));
-                this.cubeWrapper.transform.position = boardObj.transform.position + Vector3.Scale(temp, this.transform.localScale);
+                cubeWrapper.transform.position = boardObj.transform.position + Vector3.Scale(temp, this.transform.localScale);
             }
         }
 

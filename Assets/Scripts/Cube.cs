@@ -53,4 +53,8 @@ public class Cube : MonoBehaviour
             EventManager.Instance.NotifyEvent(EventManager.Event.HandTouchLeaveBlock, this, null);
         }
     }
+
+    void OnDestroy() {
+        EventManager.Instance.NotifyEvent(EventManager.Event.HandTouchLeaveBlock, this, null);
+    }
 }

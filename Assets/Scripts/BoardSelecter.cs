@@ -10,25 +10,19 @@ public class BoardSelecter : MonoBehaviour
 
     private string[] filenames;
     public GameObject selectItemPrefab;
-    public string decidedFilename;
+    public string decidedFilename { get; private set; }
     private List<BoardSelectItem> items = new List<BoardSelectItem>();
+    public bool isActivating { get; private set; } = false;
 
     private float timeout = 1.0f;
     private bool fin = false;
 
     void Start()
     {
-        LoadFiles();
-        decidedFilename = "";
     }
 
     void Update()
     {
-        if (timeout > 0) timeout -= Time.deltaTime;
-        if (timeout < 0 && !fin) {
-            InstantiateItems();
-            fin = true;
-        }
     }
 
     void LoadFiles()
@@ -66,7 +60,17 @@ public class BoardSelecter : MonoBehaviour
         if (decidedFilename == "") decidedFilename = filename;
     }
 
+    public void Activate() {
+        if (isActivating) return;
+        isActivating = true;
+        LoadFiles();
+        decidedFilename = "";
+        InstantiateItems();
+    }
+
     public void Deactivate() {
+        if (!isActivating) return;
+        isActivating = false;
         foreach (var item in items) {
             item.Disappear();
         }
