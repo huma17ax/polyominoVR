@@ -15,6 +15,7 @@ public class Block : MonoBehaviour
     public GameObject cubeWrapperPrefab;
     private Color color;
 
+    public bool rotatable = true;
     private const float rotateTime = 0.1f;
     private float leftTime;
     private int rotateWay = 0;
@@ -67,6 +68,7 @@ public class Block : MonoBehaviour
 
     // 回転操作の際に呼び出し(回転開始)
     private void Rotate(bool clockwise) {
+        if (!rotatable) return;
         if (graspedHand && leftTime == 0.0f) {
             leftTime = rotateTime;
             rotateWay = (clockwise ? 1 : -1);
