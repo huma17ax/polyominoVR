@@ -36,23 +36,36 @@ public class BoardSelecter : MonoBehaviour
         for (var i=0; i<filenames.Length; i++) {
             GameObject obj = Instantiate(
                 selectItemPrefab,
-                new Vector3(
-                    this.transform.position.x + radius * (float)Math.Cos(radian*(i+1)),
-                    this.transform.position.y + 0*this.transform.localScale.y,
-                    this.transform.position.z + radius * (float)Math.Sin(radian*(i+1))
-                ),
+                new Vector3(),
                 new Quaternion());
             BoardSelectItem item = obj.GetComponent<BoardSelectItem>();
             item.SetUp(
                 new Vector3(
                     this.transform.position.x + radius * (float)Math.Cos(radian*(i+1)),
-                    this.transform.position.y + 0*this.transform.localScale.y,
+                    this.transform.position.y - 0.1f,
                     this.transform.position.z + radius * (float)Math.Sin(radian*(i+1))
                 ),
                 this,
                 filenames[i]
             );
             items.Add(item);
+        }
+        {
+        GameObject obj = Instantiate(
+            selectItemPrefab,
+            new Vector3(),
+            new Quaternion());
+        BoardSelectItem item = obj.GetComponent<BoardSelectItem>();
+        item.SetUp(
+            new Vector3(
+                this.transform.position.x,
+                this.transform.position.y + 0.1f,
+                this.transform.position.z + radius
+            ),
+            this,
+            "Generater"
+        );
+        items.Add(item);
         }
     }
 

@@ -29,16 +29,29 @@ public class Board : MonoBehaviour
 
     // パズル形状ファイルを読み込み，Blockの生成
     public void Load(string path) {
-        // TODO: *ライブラリ使う
-        StreamReader reader = new StreamReader(path);
         List<List<int>> board = new List<List<int>>();
 
-        while (!reader.EndOfStream) {
-            string row = reader.ReadLine();
-            board.Add(new List<int>(row.Split(',').Select(str => int.Parse(str))));
+        if (path == "Generater") {
+            BoardGenerator generator = new BoardGenerator("./Assets/PazzleBoards/test.csv", 5);
+            board = generator.Generate();
+        }
+        else {
+            // TODO: *ライブラリ使う
+            StreamReader reader = new StreamReader(path);
+
+            while (!reader.EndOfStream) {
+                string row = reader.ReadLine();
+                board.Add(new List<int>(row.Split(',').Select(str => int.Parse(str))));
+            }
+
+            if (!isValidBoard(board)) return;
         }
 
-        if (!isValidBoard(board)) return;
+        this.transform.position = new Vector3(
+            this.transform.position.x - board[0].Count * this.transform.localScale.x / 2,
+            this.transform.position.y - board.Count * this.transform.localScale.y / 2,
+            this.transform.position.z
+        );
 
         for (int y=0; y < board.Count; ++y) {
             for (int x=0; x < board[y].Count; ++x) {
@@ -76,6 +89,7 @@ public class Board : MonoBehaviour
 
         List<Block> blocks = new List<Block>();
         int pos = 0;
+        int num = 0;
         foreach (int id in ids) {
             List<List<bool>> blockShape = board
                 .GetRange(blockRanges[id].min.y, blockRanges[id].max.y - blockRanges[id].min.y + 1)
@@ -83,14 +97,30 @@ public class Board : MonoBehaviour
                 .Select(row => row.Select(val => val == id).ToList())
                 .ToList();
             
-            GameObject blockInstance = Instantiate(blockPrefab, new Vector3(this.transform.position.x - 1+0.4f*(pos),this.transform.position.y,this.transform.position.z-0.15f), new Quaternion());
+            GameObject blockInstance = Instantiate(
+                blockPrefab,
+                new Vector3(
+                    this.transform.position.x + pos * this.transform.localScale.x,
+                    this.transform.position.y,
+                    this.transform.position.z - 0.15f
+                ),
+                new Quaternion()
+            );
             blockInstance.transform.localScale = this.transform.localScale;
             Block _temp_block = blockInstance.GetComponent<Block>();
             _temp_block.SetShape(blockShape);
-            _temp_block.SetColor(colors[pos]);
+            _temp_block.SetColor(colors[num++]);
             _temp_block.SetBoard(this.gameObject);
             blocks.Add(_temp_block);
-            pos++;
+            pos += blockShape[0].Count + 1;
+        }
+
+        foreach (var block in blocks) {
+            block.gameObject.transform.position = new Vector3(
+                block.gameObject.transform.position.x + (board[0].Count-pos)/2*this.transform.localScale.x,
+                block.gameObject.transform.position.y,
+                block.gameObject.transform.position.z
+            );
         }
     }
 
