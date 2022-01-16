@@ -10,10 +10,11 @@ public class Block : MonoBehaviour
 {
     private List<List<bool>> shape;
     private GameObject cubeWrapper;
-    private GameObject boardObj;
+    private Board board;
     public GameObject cubePrefab;
     public GameObject cubeWrapperPrefab;
     private Color color;
+    private List<Vector2Int> fixedPositions = new List<Vector2Int>();
 
     public bool rotatable = true;
     private const float rotateTime = 0.1f;
@@ -57,13 +58,22 @@ public class Block : MonoBehaviour
         }
     }
 
-    public void SetBoard(GameObject _board) {
-        boardObj = _board;
+    public void SetBoard(Board _board) {
+        board = _board;
     }
 
     // 掴まれた際に呼び出し
     public void Grasp(HandControlManager? hand) {
         graspedHand = hand;
+
+        // 掴まれていない & Boardに近い場合，Boardのマス目に合わせて位置を補正
+        if (!graspedHand) {
+            CorrectPosition();
+        }
+        else if (board){
+            board.Empty(fixedPositions);
+            fixedPositions = new List<Vector2Int>();
+        }
     }
 
     // 回転操作の際に呼び出し(回転開始)
@@ -98,20 +108,6 @@ public class Block : MonoBehaviour
             }
         }
 
-        // 掴まれていない & Boardに近い場合，Boardのマス目に合わせて位置を補正
-        if (!graspedHand) {
-            bool inFrame = false;
-            foreach (Cube cube in cubes) {
-                if (cube.inFrame) {inFrame = true; break;}
-            }
-            if (inFrame) {
-                Vector3 temp = cubeWrapper.transform.position - boardObj.transform.position;
-                temp = new Vector3(temp.x / this.transform.localScale.x, temp.y / this.transform.localScale.y, temp.z / this.transform.localScale.z);
-                temp = new Vector3(Mathf.Round(temp.x), Mathf.Round(temp.y), Mathf.Round(temp.z));
-                cubeWrapper.transform.position = boardObj.transform.position + Vector3.Scale(temp, this.transform.localScale);
-            }
-        }
-
         // 掴まれているとき，手の位置に追従
         if (graspedHand) {
             if (prevHandPos.HasValue) {
@@ -122,6 +118,31 @@ public class Block : MonoBehaviour
             prevHandPos = null;
         }
 
+    }
+
+    private void CorrectPosition() {
+        bool inFrame = false;
+        foreach (Cube cube in cubes) {
+            if (cube.inFrame) {inFrame = true; break;}
+        }
+        if (inFrame) {
+            Vector3 temp = cubeWrapper.transform.position - board.gameObject.transform.position;
+            temp = new Vector3(temp.x / this.transform.localScale.x, temp.y / this.transform.localScale.y, temp.z / this.transform.localScale.z);
+            temp = new Vector3(Mathf.Round(temp.x), Mathf.Round(temp.y), Mathf.Round(temp.z));
+            cubeWrapper.transform.position = board.gameObject.transform.position + Vector3.Scale(temp, this.transform.localScale);
+            
+            fixedPositions = new List<Vector2Int>();
+            foreach (Cube cube in cubes) {
+                Vector3 offset = cube.transform.position - board.gameObject.transform.position;
+                fixedPositions.Add(
+                    new Vector2Int(
+                        Mathf.RoundToInt(offset.x/this.transform.localScale.x),
+                        Mathf.RoundToInt(offset.y/this.transform.localScale.y)
+                    )
+                );
+            }
+            board.Fill(fixedPositions);
+        }
     }
 
 }

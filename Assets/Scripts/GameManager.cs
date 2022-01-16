@@ -10,17 +10,22 @@ public class GameManager : MonoBehaviour
 
     public GameObject boardPrefab;
     private BoardSelecter selecter;
-    private TextMeshPro textMesh;
+    private TextMeshPro waitingTextMesh;
+    private TextMeshPro finishTextMesh;
+    private Board board;
 
     private bool isWaiting;
     private bool isSelecting;
+    private bool isGaming;
 
     void Start()
     {
         // 盤面の生成，ゲームの開始
         selecter = this.GetComponent<BoardSelecter>();
-        textMesh = this.transform.Find("WaitingText").GetComponent<TextMeshPro>();
-        textMesh.enabled = true;
+        waitingTextMesh = this.transform.Find("WaitingText").GetComponent<TextMeshPro>();
+        waitingTextMesh.enabled = true;
+        finishTextMesh = this.transform.Find("FinishText").GetComponent<TextMeshPro>();
+        finishTextMesh.enabled = false;
         isWaiting = true;
         isSelecting = false;
     }
@@ -29,7 +34,7 @@ public class GameManager : MonoBehaviour
     {
         if (isWaiting && OVRInput.GetDown(OVRInput.RawButton.RHandTrigger)) {
             isWaiting = false;
-            textMesh.enabled = false;
+            waitingTextMesh.enabled = false;
             selecter.Activate();
             isSelecting = true;
         }
@@ -38,18 +43,23 @@ public class GameManager : MonoBehaviour
             isSelecting = false;
             StartGame();
         }
+        if (isGaming && board.finishGame) {
+            finishTextMesh.enabled = true;
+        }
     }
 
     async void StartGame() {
         await Task.Delay(200);
-        GameObject board = Instantiate(
+        GameObject boardObj = Instantiate(
             boardPrefab,
             new Vector3(
                 this.transform.position.x,
                 this.transform.position.y,
                 this.transform.position.z + 0.5f),
             new Quaternion());
-        board.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-        board.GetComponent<Board>().Load(selecter.decidedFilename);
+        boardObj.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+        board = boardObj.GetComponent<Board>();
+        board.Load(selecter.decidedFilename);
+        isGaming = true;
     }
 }

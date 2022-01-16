@@ -14,9 +14,6 @@ public class BoardSelecter : MonoBehaviour
     private List<BoardSelectItem> items = new List<BoardSelectItem>();
     public bool isActivating { get; private set; } = false;
 
-    private float timeout = 1.0f;
-    private bool fin = false;
-
     void Start()
     {
     }

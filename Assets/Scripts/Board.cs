@@ -18,6 +18,9 @@ public class Board : MonoBehaviour
         new Color(1f,0.3f,1f,1f),
         new Color(0.3f,1f,1f,1f)
     };
+    private List<List<bool>> shape;
+    private List<List<int>> fillingStatus;
+    public bool finishGame {get; private set; } = false;
     
     void Start()
     {
@@ -46,6 +49,15 @@ public class Board : MonoBehaviour
 
             if (!isValidBoard(board)) return;
         }
+
+        shape = board
+            .Select(row =>
+                row.Select(val => val!=0).ToList()
+            ).ToList();
+        fillingStatus = board
+            .Select(row =>
+                row.Select(val => 0).ToList()
+            ).ToList();
 
         this.transform.position = new Vector3(
             this.transform.position.x - board[0].Count * this.transform.localScale.x / 2,
@@ -110,7 +122,7 @@ public class Board : MonoBehaviour
             Block _temp_block = blockInstance.GetComponent<Block>();
             _temp_block.SetShape(blockShape);
             _temp_block.SetColor(colors[num++]);
-            _temp_block.SetBoard(this.gameObject);
+            _temp_block.SetBoard(this);
             blocks.Add(_temp_block);
             pos += blockShape[0].Count + 1;
         }
@@ -128,5 +140,40 @@ public class Board : MonoBehaviour
         // TODO: *盤面正当性チェック
         Debug.Log((board.Count, board[0].Count));
         return true;
+    }
+
+    public void Fill(List<Vector2Int> positions) {
+        foreach (var pos in positions) {
+            if (pos.y < 0 || fillingStatus.Count <= pos.y) continue;
+            if (pos.x < 0 || fillingStatus[pos.y].Count <= pos.x) continue;
+            fillingStatus[pos.y][pos.x] += 1;
+            Debug.Log("(" + pos.x+","+pos.y + ")");
+        }
+        if (isFull()) {
+            Debug.Log("clear");
+            finishGame = true;
+        }
+    }
+
+    public void Empty(List<Vector2Int> positions) {
+        foreach (var pos in positions) {
+            if (pos.y < 0 || fillingStatus.Count <= pos.y) continue;
+            if (pos.x < 0 || fillingStatus[pos.y].Count <= pos.x) continue;
+            fillingStatus[pos.y][pos.x] -= 1;
+        }
+    }
+
+    private bool isFull() {
+        Debug.Log(string.Join(",", fillingStatus.Select(row => "(" + string.Join(",", row) + ")").ToList()));
+        bool flg = true;
+        for (int y=0; y < fillingStatus.Count; ++y) { 
+            for (int x=0; x < fillingStatus[y].Count; ++x) {
+                if (shape[y][x] && fillingStatus[y][x]!=1) {
+                    flg = false;
+                    break;
+                } 
+            }
+        }
+        return flg;
     }
 }
