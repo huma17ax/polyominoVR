@@ -6,6 +6,7 @@ TagManager:
   tags:
   - frame
   - hand
+  - cube
   layers:
   - Default
   - TransparentFX
