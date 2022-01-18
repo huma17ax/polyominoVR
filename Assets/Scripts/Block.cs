@@ -25,6 +25,7 @@ public class Block : MonoBehaviour
     private Vector3? prevHandPos = null;
 
     private List<Cube> cubes = new List<Cube>();
+    private Rigidbody rigidbody;
 
     //ブロック形状の設定(Cubeの生成)
     public void SetShape(List<List<bool>> _shape) {
@@ -64,15 +65,21 @@ public class Block : MonoBehaviour
 
     // 掴まれた際に呼び出し
     public void Grasp(HandControlManager? hand) {
+        Debug.Log("aaa");
         graspedHand = hand;
+        this.transform.parent = (hand ? hand.transform : null);
 
         // 掴まれていない & Boardに近い場合，Boardのマス目に合わせて位置を補正
         if (!graspedHand) {
             CorrectPosition();
+            rigidbody.useGravity = true;
+            rigidbody.constraints = RigidbodyConstraints.None;
         }
         else if (board){
             board.Empty(fixedPositions);
             fixedPositions = new List<Vector2Int>();
+            rigidbody.useGravity = false;
+            rigidbody.constraints = RigidbodyConstraints.FreezeAll;
         }
     }
 
@@ -92,6 +99,8 @@ public class Block : MonoBehaviour
         // イベントの購読
         EventManager.Instance.Subscribe(EventManager.Event.RightHandShakeClockwise, RotateClockwise);
         EventManager.Instance.Subscribe(EventManager.Event.RightHandShakeAnticlockwise, RotateAnticlockwise);
+
+        rigidbody = this.GetComponent<Rigidbody>();
     }
 
     void Update()
@@ -109,14 +118,16 @@ public class Block : MonoBehaviour
         }
 
         // 掴まれているとき，手の位置に追従
-        if (graspedHand) {
-            if (prevHandPos.HasValue) {
-                this.transform.position = this.transform.position + graspedHand.gameObject.transform.position - (Vector3)prevHandPos;
-            }
-            prevHandPos = graspedHand.gameObject.transform.position;
-        } else if (leftTime == 0.0f) {
-            prevHandPos = null;
-        }
+        // if (graspedHand) {
+        //     if (prevHandPos.HasValue) {
+        //         if (rigidbody) rigidbody.MovePosition(graspedHand.gameObject.transform.position);
+        //         else this.transform.position = this.transform.position + graspedHand.gameObject.transform.position - (Vector3)prevHandPos;
+        //     }
+        //     prevHandPos = graspedHand.gameObject.transform.position;
+        // } else if (leftTime == 0.0f) {
+        //     prevHandPos = null;
+        // }
+        if (graspedHand && rigidbody) rigidbody.velocity = new Vector3(0,0,0);
 
     }
 

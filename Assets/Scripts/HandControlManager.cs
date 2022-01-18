@@ -45,9 +45,28 @@ public class HandControlManager : MonoBehaviour
     }
 
     private void AddTouchingCube(object obj, EventArgs args) {
+        Debug.Log("bbb");
         touchingCubes.Add((Cube)obj);
     }
     private void RemoveTouchingCube(object obj, EventArgs args) {
         touchingCubes.Remove((Cube)obj);
+    }
+
+    void OnTriggerEnter(Collider other) {
+        Debug.Log("trigger");
+        // 手に接触(侵入)
+        if (other.gameObject.tag == "cube") {
+            Cube cube = other.gameObject.GetComponent<Cube>();
+            cube.isTouched = true;
+            AddTouchingCube(cube, null);
+        }
+    }
+
+    void OnTriggerExit(Collider other) {
+        if (other.gameObject.tag == "cube") {
+            Cube cube = other.gameObject.GetComponent<Cube>();
+            cube.isTouched = false;
+            RemoveTouchingCube(cube, null);
+        }
     }
 }
